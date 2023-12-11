@@ -13,7 +13,7 @@ class User {
     static async createUser({ name, email, password, identityDocument, documentType, nationality, phoneNumber }) {
         try {
             if (!name || !email || !password || !identityDocument || !documentType || !nationality || !phoneNumber) {
-                throw new Error("Todos os campos são obrigatórios.");
+                throw new Error("Todos os campos são obrigatórios1.");
             }
     
             console.log("Senha recebida:", password);
