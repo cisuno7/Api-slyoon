@@ -17,24 +17,20 @@ const login = async (req, res) => {
         const token = jwt.sign({ id: user.ID }, process.env.JWT_SECRET, { expiresIn: '1h' });
         res.send({ token });
     } catch (err) {
-        res.status(500).send("Erro no servidor.");
+        console.error("Erro durante o login:", err);  
+        res.status(500).send("Erro no servidor: " + err.message);
     }
 };
 
 const register = async (req, res) => {
     try {
-        const { email, ...userData } = req.body;
-
-        const existingUser = await User.findByEmail(email);
-        if (existingUser) {
-            return res.status(400).send("Usuário já existe.");
-        }
-
-        await User.createUser(userData);
+        console.log("Dados recebidos no registro:", req.body);
+        await User.createUser(req.body);
         res.send("Usuário registrado com sucesso.");
     } catch (err) {
-        console.error(err);
-        res.status(500).send("Erro no servidor.");
+        console.error("Erro ao registrar usuário:", err);
+        res.status(500).send(err.message);
     }
 };
+
 module.exports = { login, register };
