@@ -14,23 +14,29 @@ class User {
         try {
             const pool = await getConnection();
             
-          
-            // Se não existir, prosseguir com a criação do usuário
-            console.log("Senha recebida:", password);
+            // Hash da senha
             const hashedPassword = await bcrypt.hash(password, 10);
     
+            // Inserir novo usuário
             await pool.request()
                 .input('name', sql.VarChar, name)
                 .input('email', sql.VarChar, email)
                 .input('password', sql.VarChar, hashedPassword)
                 .input('identityDocument', sql.VarChar, identityDocument)
-                .query('INSERT INTO tb_users (Name, Email, Password) VALUES (@name, @email, @password)');
+                .input('documentType', sql.VarChar, documentType)
+                .input('nationality', sql.VarChar, nationality)
+                .input('phoneNumber', sql.VarChar, phoneNumber)
+                .input('createdAt', sql.DateTime, new Date()) // Adicionando a data atual
+                .input('lastAccess', sql.DateTime, new Date()) // Adicionando a data atual
+                .input('active', sql.Bit, 1) // Definindo o usuário como ativo
+                .query('INSERT INTO tb_users (Name, Email, Password, IdentityDocument, DocumentType, Nationality, PhoneNumber, CreatedAt, LastAccess, Active) VALUES (@name, @email, @password, @identityDocument, @documentType, @nationality, @phoneNumber, @createdAt, @lastAccess, @active)');
     
         } catch (error) {
             console.error('Erro ao criar usuário:', error);
             throw error;
         }
     }
+    
     
 }    
 
