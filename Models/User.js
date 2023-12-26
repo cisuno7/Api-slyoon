@@ -10,7 +10,7 @@ class User {
             .query('SELECT * FROM tb_users WHERE Email = @email');
         return result.recordset[0];
     }
-    static async createUser({ name, email, password, identityDocument, documentType, nationality, phoneNumber }) {
+    static async createUser({ name, email, password, identityDocument = '00000000', documentType = 'default', nationality = 'default', phoneNumber = '0000000000' }) {
         try {
             const pool = await getConnection();
             
