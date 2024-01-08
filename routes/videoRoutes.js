@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
 const videoController = require("../Controllers/videocontrollers");
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -12,7 +13,8 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // Rota para upload de vídeo no servidor
-router.post('/upload', upload.single('video'), [videoController].uploadVideo);
+router.post('/upload', upload.single('video'), videoController.uploadVideo);
+
 // routes/tiktokRoutes.js
 router.get('/videos', async (req, res) => {
     try {

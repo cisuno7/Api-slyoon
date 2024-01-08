@@ -1,5 +1,5 @@
 // controllers/VideoController.js
-const VideoModel = require('../models/VideoModel');
+const VideoModel = require('../Models/videos');
 
 exports.uploadVideo = async (req, res) => {
     try {
