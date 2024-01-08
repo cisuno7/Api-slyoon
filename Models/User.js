@@ -14,10 +14,10 @@ class User {
         try {
             const pool = await getConnection();
             
-            // Hash da senha
+            
             const hashedPassword = await bcrypt.hash(password, 10);
     
-            // Inserir novo usuário
+       
             await pool.request()
                 .input('name', sql.VarChar, name)
                 .input('email', sql.VarChar, email)
@@ -26,9 +26,9 @@ class User {
                 .input('documentType', sql.VarChar, documentType)
                 .input('nationality', sql.VarChar, nationality)
                 .input('phoneNumber', sql.VarChar, phoneNumber)
-                .input('createdAt', sql.DateTime, new Date()) // Adicionando a data atual
-                .input('lastAccess', sql.DateTime, new Date()) // Adicionando a data atual
-                .input('active', sql.Bit, 1) // Definindo o usuário como ativo
+                .input('createdAt', sql.DateTime, new Date()) 
+                .input('lastAccess', sql.DateTime, new Date()) 
+                .input('active', sql.Bit, 1)
                 .query('INSERT INTO tb_users (Name, Email, Password, IdentityDocument, DocumentType, Nationality, PhoneNumber, CreatedAt, LastAccess, Active) VALUES (@name, @email, @password, @identityDocument, @documentType, @nationality, @phoneNumber, @createdAt, @lastAccess, @active)');
     
         } catch (error) {
