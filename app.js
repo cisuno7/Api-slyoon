@@ -1,6 +1,5 @@
 const express = require('express');
 const app = express();
-const multer = require('multer');
 const authRoutes = require('./routes/authRoutes'); 
 const videoRoutes = require('./routes/videoRoutes');
 require('dotenv').config();
