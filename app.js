@@ -5,9 +5,9 @@ const authRoutes = require('./routes/authRoutes');
 const videoRoutes = require('./routes/videoRoutes');
 require('dotenv').config();
 app.use(express.json());
-
+const verifyToken = require('./Middleware/VerifyToken');
 app.use('/api/auth', authRoutes);
-
+app.use(verifyToken);
 app.use('/api/video',videoRoutes);
 
 const PORT = process.env.PORT || 3000;

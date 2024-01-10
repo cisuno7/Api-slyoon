@@ -12,9 +12,14 @@ const login = async (req, res) => {
         if (!validPassword) {
             return res.status(400).send("Senha incorreta.");
         }
-
-        // Gere o token JWT
-        const token = jwt.sign({ id: user.ID }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        // Gere o token JWT COM HEADER
+    const token = jwt.sign({
+        id: user.ID,
+        iat: Math.floor(Date.now() / 1000), // Timestamp de emissão
+      }, process.env.JWT_SECRET, {
+        expiresIn: '1h',
+        header: { typ: 'JWT' }, // Header com tipo JWT
+      });
         res.send({ token });
     } catch (err) {
         console.error("Erro durante o login:", err);  
