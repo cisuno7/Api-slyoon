@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const generateToken = require('../helpers/auth');
+
 const winston = require('winston');
 
 const logger = winston.createLogger({
