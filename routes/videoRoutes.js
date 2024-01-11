@@ -1,20 +1,20 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const videoController = require("../Controllers/videocontrollers");
-const path = require('path'); // Import path module for robust file paths
+const videoController = require('../Controllers/videocontrollers');
+const path = require('path'); // Importa o módulo path para caminhos de arquivos robustos
 const fs = require('fs');
 const verifyToken = require('../Middleware/VerifyToken');
 
-// Construct upload directory path reliably
+// Constrói o caminho do diretório de upload de forma confiável
 const uploadDirectory = path.join(__dirname, 'uploads');
 
-// Create directory with error handling
+// Cria o diretório com tratamento de erros
 try {
   fs.mkdirSync(uploadDirectory, { recursive: true });
 } catch (err) {
-  console.error('Error creating directory:', err);
-  // Handle the error appropriately (e.g., send error response)
+  console.error('Erro ao criar o diretório:', err);
+  // Trate o erro de forma apropriada (por exemplo, envie uma resposta de erro)
 }
 
 const storage = multer.diskStorage({
@@ -28,7 +28,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// Apply verification middleware to protected routes
+// Aplica o middleware de verificação às rotas protegidas
 router.post('/upload', verifyToken, upload.single('video_file'), videoController.uploadVideo);
 
 // routes/tiktokRoutes.js
