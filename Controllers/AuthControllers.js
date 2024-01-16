@@ -45,5 +45,45 @@ const register = async (req, res) => {
     }
 };
 
-
-module.exports = { login, register };
+const editarPerfil = async (req, res) => {
+    try {
+      // Verifique o token de autenticação e atribua o usuário autenticado à variável `req.user`
+      const decoded = jwt.verify(req.headers['authorization'], process.env.JWT_SECRET);
+      req.user = decoded;
+  
+      // Colete os dados do formulário
+      const { username, name, description, avatarURL } = req.body;
+  
+      // Converta a foto para base64
+      const avatarBase64 = base64url.encode(avatarURL);
+  
+      // Atualizar o perfil no banco de dados
+      const updatedUser = await User.update(req.user.id, {
+        username,
+        name,
+        description,
+        avatarURL: avatarBase64,
+      });
+  
+      res.status(200).json({ message: 'Perfil atualizado com sucesso!' });
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
+  };
+  
+  const buscaUsuario = async (req, res) => {
+    const { name } = req.query;
+  
+    try {
+      const users = await User.find({
+        name: { $regex: name, $options: 'i' },
+      });
+  
+      res.json(users);
+    } catch (error) {
+      console.error('Erro ao buscar usuários:', error);
+      res.status(500).json({ message: 'Erro ao buscar usuários.' });
+    }
+  };
+  
+module.exports = { login, register,editarPerfil,buscaUsuario};

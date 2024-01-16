@@ -36,7 +36,32 @@ class User {
             throw error;
         }
     }
-    
+    static async update(id, data) {
+        try {
+          const pool = await getConnection();
+          await pool.request()
+            .input('id', sql.Int, id)
+            // Adicione os demais campos a serem atualizados
+            .query(`UPDATE tb_users SET ${Object.keys(data).map(key => `${key} = @${key}`).join(', ')} WHERE ID = @id`);
+        } catch (error) {
+          console.error('Erro ao atualizar usuário:', error);
+          throw error;
+        }
+      }
+      static async find( ) {
+        try {
+          const pool = await getConnection();
+          const result = await pool.request()
+            .query(
+              `SELECT Name FROM tb_users`,
+              
+            );
+          return result.recordset;
+        } catch (error) {
+          console.error('Erro ao buscar usuários:', error);
+          throw error;
+        }
+      }
     
 }    
 
