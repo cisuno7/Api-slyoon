@@ -2,9 +2,7 @@
 const videoController = require('../Controllers/videocontrollers');
 const express = require('express');
 const router = express.Router();
-
 router.post('/upload', videoController.uploadVideo);
-
 
 router.get('/videos', async (req, res) => {
   try {

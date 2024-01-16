@@ -24,7 +24,7 @@ exports.uploadVideo = async (req, res) => {
     }
 
     // Upload the video to Minio
-    const nomeDoBucket = 'Videos'; // Seu nome de bucket atual
+    const bucketName = 'Videos'; // Seu nome de bucket atual
 
     const caminhoDoVideoNoMinio = 'videos/' + videoFile.originalname;
 
