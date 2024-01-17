@@ -12,7 +12,7 @@ exports.uploadVideo = async (req, res) => {
   try {
     const { title, description } = req.body;
     const uploaderId = req.user.id;
-    const videoFile = req.file; // Get the uploaded video file
+    const videoFile = req.file; 
 
     // Validate data
     if (!title || title.length < 3) {
