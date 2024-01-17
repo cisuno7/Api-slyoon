@@ -1,49 +1,54 @@
-const VideoModel = require('../Models/videos');
+const multer = require('multer');
 const Minio = require('minio');
+const VideoModel = require('../Models/videos');
+
+// Configuração do cliente Minio
 const minioClient = new Minio.Client({
   endPoint: 'play.min.io',
   port: 9000,
-  accessKey: '2QQxHECsr4',
-  useSSL: true,
-  secretKey: 'Hz6jqIIab2'
+  accessKey: 'Q3AM3UQ867SPQQA43P2F',
+  secretKey: 'zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG'
 });
 
-exports.uploadVideo = async (req, res) => {
-  try {
-    const { title, description } = req.body;
-    const uploaderId = req.user.id;
-    const videoFile = req.file; 
+// Configuração do Multer
+const upload = multer({
+  storage: multer.memoryStorage()
+});
 
+// Middleware do Multer para processar o arquivo de vídeo
+exports.uploadVideo = upload.single('videoFile');
+
+// Função para lidar com a lógica de upload
+exports.processVideoUpload = async (req, res) => {
+  // Validação do arquivo de vídeo
+  try {
+    const { 'title ': title, description } = req.body;
+
+    console.log(req.body)
+    console.log(title);
     // Validate data
-    if (!title || title.length < 3) {
+    if ((title || '').length < 3) {
       throw new Error('O título do vídeo deve ter pelo menos 3 caracteres.');
     }
-
     if (!description || description.length < 10) {
       throw new Error('A descrição do vídeo deve ter pelo menos 10 caracteres.');
     }
+console.log(description);
+    // Upload do vídeo para o Minio
+    const bucketName = 'bookings';
+    const caminhoDoVideoNoMinio = 'bookings/' + req.file.originalname;
+    await minioClient.putObject(bucketName, caminhoDoVideoNoMinio, req.file.buffer);
 
-    // Upload the video to Minio
-    const bucketName = 'Videos'; // Seu nome de bucket atual
-
-    const caminhoDoVideoNoMinio = 'videos/' + videoFile.originalname;
-
-// Upload the video to Minio
-await minioClient.putObject(bucketName, 'videos/' + videoFile.originalname, videoFile);
-
-
-    // Save video information to the database (using Minio path)
+    // Salvar informações do vídeo no banco de dados
     await VideoModel.saveVideoInfo({
       title,
       description,
-      uploaderId,
-      videoPath: videoPathOnMinio
+      uploaderId: req.user.id, // ID do usuário
+      videoPath: caminhoDoVideoNoMinio
     });
 
     res.status(201).json({ message: 'Vídeo enviado com sucesso!' });
   } catch (error) {
-    const statusCode = error.statusCode || 500;
-    const message = error.message || 'Erro ao carregar vídeo.';
-    res.status(statusCode).send(message);
+    res.status(500).send(error.message);
   }
 };

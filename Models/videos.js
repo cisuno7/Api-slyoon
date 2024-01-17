@@ -4,6 +4,7 @@ const getConnection = require('../DB/db');
 
 class VideoModel {
     static async saveVideoInfo({ title, description, uploaderId, videoPath }) {
+        console.log({ title, description, uploaderId, videoPath }); //
         const pool = await getConnection();
         if (videoPath) {
             await pool.request()
