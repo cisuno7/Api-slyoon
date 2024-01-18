@@ -61,7 +61,7 @@ class User {
           console.error('Erro ao buscar usuários:', error);
           throw error;
         }
-      }
+      } 
     
 }    
 

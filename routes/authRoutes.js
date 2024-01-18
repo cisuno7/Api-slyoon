@@ -6,5 +6,5 @@ router.post('/login', authController.login);
 router.post('/register', authController.register);
 router.put('/editar-perfil', authController.editarPerfil);
 router.get('/busca-usuario', authController.buscaUsuario);
-  
+router.post('/forgot-password', authController.forgotPassword);
 module.exports = router;

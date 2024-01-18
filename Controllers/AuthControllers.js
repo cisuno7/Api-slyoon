@@ -86,4 +86,25 @@ const editarPerfil = async (req, res) => {
     }
   };
   
-module.exports = { login, register,editarPerfil,buscaUsuario};
+  const forgotPassword = async (req, res) => {
+    try {
+      const email = req.body.email;
+  
+      // Verifique se o e-mail existe
+      const user = await User.findByEmail(email);
+      if (!user) {
+        return res.status(400).send('E-mail não encontrado');
+      }
+      if (user) {
+        return res.status(200).send('E-mail encontrado com sucesso!');
+      }
+      // Continue com a lógica de recuperação de senha
+      // ...
+    } catch (error) {
+      console.error('Erro na função forgotPassword:', error);
+      res.status(500).send('Erro interno do servidor');
+    }
+  };
+  
+  
+module.exports = { login, register,editarPerfil,buscaUsuario,forgotPassword};
