@@ -22,7 +22,7 @@ exports.uploadVideo = upload.single('videoFile');
 exports.processVideoUpload = async (req, res) => {
   // Validação do arquivo de vídeo
   try {
-    const { 'title ': title, description } = req.body;
+    const { 'title1 ': title, description } = req.body;
 
     console.log(req.body)
     console.log(title);
