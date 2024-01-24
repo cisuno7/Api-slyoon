@@ -6,7 +6,8 @@ const videoRoutes = require('./routes/videoRoutes');
 require('dotenv').config();
 app.use(express.json());
 const verifyToken = require('./Middleware/VerifyToken');
-app.use(cors());
+app.use(cors({ origin: 'http://localhost:19006' }));
+
 app.use('/api/auth', authRoutes);
 app.use(verifyToken);
 app.use('/api/video',videoRoutes);
