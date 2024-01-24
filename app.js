@@ -10,7 +10,7 @@ app.use(cors());
 app.use('/api/auth', authRoutes);
 app.use(verifyToken);
 app.use('/api/video',videoRoutes);
-app.get('/api/status', (req, res) => {
+app.get('/api/status', verifyToken, (req, res) => {
     res.status(200).send({ status: 'Server is up and running' });
 });
 const PORT = process.env.PORT || 3000;
