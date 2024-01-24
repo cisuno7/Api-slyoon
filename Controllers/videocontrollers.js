@@ -38,10 +38,7 @@ exports.processVideoUpload = async (req, res) => {
     console.log(req.body)
     console.log(title);
     // Validate data
-    
-    if (!description || description.length < 10) {
-      throw new Error('A descrição do vídeo deve ter pelo menos 10 caracteres.');
-    }
+  
 console.log(description);
     // Upload do vídeo para o Minio
     const bucketName = 'bookings';
