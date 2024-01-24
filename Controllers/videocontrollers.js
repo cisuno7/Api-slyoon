@@ -13,18 +13,21 @@ const minioClient = new Minio.Client({
 
 });
 
-// Configuração do Multer
-// Configuração do Multer
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype === 'video/mp4' || file.mimetype === 'video/mov' || file.mimetype === 'video/avi') {
+    cb(null, true);
+  } else {
+    cb(new Error('Tipo de arquivo não suportado'), false);
+  }
+};
+
 const upload = multer({
   storage: multer.memoryStorage(),
-  maxFileSize: 1048576000, // <-- Adicione a vírgula aqui
-  allowedMimeTypes: [
-    'video/mp4',
-    'video/mov',
-    'video/avi'
-  ]
+  limits: {
+    fileSize: 1048576000
+  },
+  fileFilter: fileFilter
 });
-
 
 // Middleware do Multer para processar o arquivo de vídeo
 exports.uploadVideo = upload.single('videoFile');
@@ -34,7 +37,10 @@ exports.processVideoUpload = async (req, res) => {
   // Validação do arquivo de vídeo
   try {
     const {  title, description } = req.body;
-
+    if (!req.file || !['video/mp4', 'video/mov', 'video/avi'].includes(req.file.mimetype)) {
+      return res.status(400).json({ message: 'Formato de arquivo inválido' });
+    }
+    
     console.log(req.body)
     console.log(title);
     // Validate data
@@ -54,7 +60,9 @@ console.log(description);
     });
 
     res.status(201).json({ message: 'Vídeo enviado com sucesso!' });
-  } catch (error) {
-    res.status(500).send(error.message);
-  }
+  }catch (error) {
+    console.error('Falha durante o upload/salvamento:', error);
+    res.status(500).json({ message: 'Falha ao processar o vídeo', error: error.message });
+    }
+    
 };
