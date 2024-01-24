@@ -14,9 +14,17 @@ const minioClient = new Minio.Client({
 });
 
 // Configuração do Multer
+// Configuração do Multer
 const upload = multer({
-  storage: multer.memoryStorage()
+  storage: multer.memoryStorage(),
+  maxFileSize: 1048576000, // <-- Adicione a vírgula aqui
+  allowedMimeTypes: [
+    'video/mp4',
+    'video/mov',
+    'video/avi'
+  ]
 });
+
 
 // Middleware do Multer para processar o arquivo de vídeo
 exports.uploadVideo = upload.single('videoFile');
