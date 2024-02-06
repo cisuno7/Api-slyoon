@@ -11,6 +11,7 @@ const logger = winston.createLogger({
 });
 
 const verifyToken = (req, res, next) => {
+  console.log('Authorization header:', req.headers['authorization']);
   const tokenRequest = req.headers['authorization'];
 
   if (!tokenRequest) {
@@ -28,7 +29,7 @@ const verifyToken = (req, res, next) => {
 
   try {
     jwt.verify(token, process.env.JWT_SECRET);
-    req.user = jwt.decode(token); // assuming payload contains user information
+    req.user = jwt.decode(token); 
     next();
   } catch (error) {
     logger.error(`Erro na verificação do token: ${error.message}`);

@@ -1,30 +1,28 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../Models/User');
+const generateToken = require('../Helpers/auth');
 const login = async (req, res) => {
-    try {
-        const user = await User.findByEmail(req.body.email);
-        if (!user) {
-            return res.status(400).send("Usuário não encontrado.");
-        }
+  try {
+      const user = await User.findByEmail(req.body.email);
+      if (!user) {
+          return res.status(400).send("Usuário não encontrado.");
+      }
 
-        const validPassword = await bcrypt.compare(req.body.password, user.Password);
-        if (!validPassword) {
-            return res.status(400).send("Senha incorreta.");
-        }
-        // Gere o token JWT COM HEADER
-    const token = jwt.sign({
-        id: user.ID,
-        iat: Math.floor(Date.now() / 1000), // Timestamp de emissão
-      }, process.env.JWT_SECRET, {
-        expiresIn: '1h',
-        header: { typ: 'JWT' }, // Header com tipo JWT
-      });
-        res.send({ token });
-    } catch (err) {
-        console.error("Erro durante o login:", err);  
-        res.status(500).send("Erro no servidor: " + err.message);
-    }
+      const validPassword = await bcrypt.compare(req.body.password, user.Password);
+      if (!validPassword) {
+          return res.status(400).send("Senha incorreta.");
+      }
+
+      // Gera o token JWT para o usuário autenticado
+      const token = generateToken(user.ID);
+
+      // Envio do token como parte da resposta
+      res.send({ token: token });
+  } catch (err) {
+      console.error("Erro durante o login:", err);
+      res.status(500).send("Erro no servidor: " + err.message);
+  }
 };
 
 const register = async (req, res) => {
