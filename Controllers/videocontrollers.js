@@ -1,89 +1,126 @@
 const multer = require('multer');
-const { S3Client, PutObjectCommand,ListObjectsCommand } = require("@aws-sdk/client-s3");
+const { S3Client, PutObjectCommand, ListObjectsCommand, GetObjectCommand } = require("@aws-sdk/client-s3");
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+
+
 const VideoModel = require('../Models/videos');
 require('dotenv').config();
 
 // Configuração do cliente AWS S3
 const s3Client = new S3Client({
-
   endpoint: "https://play.min.io", // Endpoint do MinIO
   forcePathStyle: true, // Necessário para MinIO
   credentials: {
-    accessKeyId: "minioadmin", // Substitua pelo seu accessKeyId do MinIO
-    secretAccessKey: "minioadmin" // Substitua pelo seu secretAccessKey do MinIO
+    accessKeyId: "minioadmin", // Utilize variáveis de ambiente
+    secretAccessKey: "minioadmin" // Utilize variáveis de ambiente
   }
 });
-const listBucketObjects = async () => {
-  console.log("Nome do Bucket:", process.env.BUCKET_NAME)
-  const bucketName = process.env.BUCKET_NAME; // Substitua pelo nome do seu bucket
-
-  try {
-    const command = new ListObjectsCommand({ Bucket: bucketName });
-    const response = await s3Client.send(command);
-    console.log("Objetos no bucket:", response.Contents);
-  } catch (error) {
-    console.error("Erro ao listar objetos do bucket:", error);
-  }
-};
-
-listBucketObjects();
-const fileFilter = (req, file, cb) => {
-  if (file.mimetype === 'video/mp4' || file.mimetype === 'video/mov' || file.mimetype === 'video/avi' || file.mimetype === 'video/webm' || file.mimetype === 'video/ogg') {
-    cb(null, true);
-  } else {
-    cb(new Error('Tipo de arquivo não suportado'), false);
-  }
-};
-
 
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 1048576000 },
-  fileFilter: fileFilter
+  fileFilter: (req, file, cb) => {
+    if (['video/mp4', 'video/mov', 'video/avi', 'video/webm', 'video/ogg'].includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Tipo de arquivo não suportado'), false);
+    }
+  }
 });
 
-// Middleware do Multer para processar o arquivo de vídeo
 exports.uploadVideo = upload.single('videoFile');
 
-// Função para lidar com a lógica de upload
 exports.processVideoUpload = async (req, res) => {
-  console.log('Iniciando processamento de upload de vídeo');
-  console.log('Dados do corpo da requisição (req.body):', req.body);
-  console.log('Informações do arquivo (req.file):', req.file);
-  
   if (!req.file) {
-    console.log('Corpo da requisição raw:', req.rawBody);
+    return res.status(400).json({ message: 'Nenhum arquivo de vídeo fornecido.' });
   }
+
+  // Dados do corpo da requisição
+  const { title, description } = req.body;
+
   try {
-    const { title, description } = req.body;
-    if (!req.file || !['video/mp4', 'video/mov', 'video/avi'].includes(req.file.mimetype)) {
-      console.log('Formato de arquivo inválido ou arquivo ausente');
-      return res.status(400).json({ message: 'Formato de arquivo inválido' });
+    // Upload do vídeo para o S3
+    const videoPath = `videos/${req.file.originalname}`;
+    const uploadResult = await uploadToS3(req.file, videoPath);
+
+    if (!uploadResult.success) {
+      // Se o upload falhar, retorna um erro específico
+      return res.status(500).json({ message: uploadResult.message });
     }
 
-    // Upload do vídeo para o S3
-    const bucketName = process.env.BUCKET_NAME;
-    const videoPath = 'videos/' + req.file.originalname;
-    const command = new PutObjectCommand({
-      Bucket: bucketName,
-      Key: videoPath,
-      Body: req.file.buffer,
-      ContentType: req.file.mimetype,
-    });
-    await s3Client.send(command);
-    
-
     // Salvar informações do vídeo no banco de dados
-    await VideoModel.saveVideoInfo({
+    const dbSaveResult = await saveVideoInfo({
       title,
       description,
-      uploaderId: req.user.id,
-      videoPath: videoPath
+      uploaderId: req.user.id, // Assumindo que este ID vem de um middleware de autenticação
+      videoPath: uploadResult.path,
     });
 
+    if (!dbSaveResult.success) {
+      // Se o salvamento no banco falhar, retorna um erro específico
+      return res.status(500).json({ message: dbSaveResult.message });
+    }
+
+    // Sucesso
     res.status(201).json({ message: 'Vídeo enviado com sucesso!' });
+
   } catch (error) {
-    console.error('Falha durante o upload/salvamento:', error);
-    res.status(500).json({ message: 'Falha ao processar o vídeo', error: error.message });
+    // Tratamento de erro genérico
+    console.error('Erro no processo de upload:', error);
+    res.status(500).json({ message: 'Erro interno do servidor.' });
   }
 };
+
+async function uploadToS3(file, path) {
+  try {
+    const command = new PutObjectCommand({
+      Bucket: process.env.BUCKET_NAME,
+      Key: path,
+      Body: file.buffer,
+      ContentType: file.mimetype,
+    });
+    await s3Client.send(command);
+    return { success: true, path };
+  } catch (error) {
+    console.error('Falha ao fazer upload para o S3:', error);
+    return { success: false, message: 'Falha ao fazer upload para o S3.' };
+  }
+}
+
+async function saveVideoInfo(videoData) {
+  try {
+    // Assumindo que VideoModel.saveVideoInfo é uma função assíncrona
+    await VideoModel.saveVideoInfo(videoData);
+    return { success: true };
+  } catch (error) {
+    console.error('Erro ao salvar informações do vídeo no banco de dados:', error);
+    return { success: false, message: 'Erro ao salvar informações no banco de dados.' };
+  }
+}
+
+
+// Definindo e exportando a função assíncrona diretamente
+exports.listVideosAndGenerateSignedUrls = async () => {
+  try {
+    const command = new ListObjectsCommand({
+      Bucket: process.env.BUCKET_NAME,
+      Prefix: "videos/", // Ajuste conforme necessário para o seu caso de uso
+    });
+    const { Contents } = await s3Client.send(command);
+    const urls = await Promise.all(
+      Contents.map(async (file) => {
+        // Gera uma URL assinada para cada arquivo listado
+        const url = await getSignedUrl(s3Client, new GetObjectCommand({
+          Bucket: process.env.BUCKET_NAME,
+          Key: file.Key,
+        }), { expiresIn: 3600 }); // Ajuste o tempo de expiração conforme necessário
+        return { url, key: file.Key };
+      })
+    );
+    return { success: true, urls };
+  } catch (error) {
+    console.error('Erro ao listar vídeos:', error);
+    return { success: false, message: 'Erro ao listar vídeos.' };
+  }
+};
+
