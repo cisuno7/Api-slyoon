@@ -8,13 +8,15 @@ require('dotenv').config();
 
 // Configuração do cliente AWS S3
 const s3Client = new S3Client({
-  endpoint: "https://play.min.io", // Endpoint do MinIO
-  forcePathStyle: true, // Necessário para MinIO
+  endpoint: "http://env-6860159.jelastic.saveincloud.net/", // Seu endpoint MinIO
+  region: "us-east-1", // Pode ser necessário ajustar a região conforme necessário
   credentials: {
-    accessKeyId: "minioadmin", // Utilize variáveis de ambiente
-    secretAccessKey: "minioadmin" // Utilize variáveis de ambiente
-  }
+    accessKeyId: "kWmhUEnUP8", // Sua Access Key
+    secretAccessKey: "kcFAIaBHS3" // Sua Secret Key
+  },
+  forcePathStyle: true, // Usar o estilo de caminho para buckets (necessário para MinIO)
 });
+
 
 const upload = multer({
   storage: multer.memoryStorage(),
