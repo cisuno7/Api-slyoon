@@ -11,8 +11,8 @@ const s3Client = new S3Client({
   endpoint: "http://env-6860159.jelastic.saveincloud.net/", // Seu endpoint MinIO
   region: "us-east-1", // Pode ser necessário ajustar a região conforme necessário
   credentials: {
-    accessKeyId: "kWmhUEnUP8", // Sua Access Key
-    secretAccessKey: "kcFAIaBHS3" // Sua Secret Key
+    accessKeyId:  process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY // Sua Secret Key
   },
   forcePathStyle: true, // Usar o estilo de caminho para buckets (necessário para MinIO)
 });
