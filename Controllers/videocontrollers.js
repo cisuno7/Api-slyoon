@@ -11,8 +11,8 @@ const s3Client = new S3Client({
   endpoint: "http://env-6860159.jelastic.saveincloud.net/", // Seu endpoint MinIO
   region: "us-east-1", // Pode ser necessário ajustar a região conforme necessário
   credentials: {
-    accessKeyId: "kWmhUEnUP8", // Sua Access Key
-    secretAccessKey: "kcFAIaBHS3" // Sua Secret Key
+    accessKeyId: "wJVUF4S7TVV7r21T", // Sua Access Key
+    secretAccessKey: "RP476d0GpVkTFSIxg3JB4OUZNjnYgUuU" // Sua Secret Key
   },
   forcePathStyle: true, // Usar o estilo de caminho para buckets (necessário para MinIO)
 });
@@ -102,27 +102,33 @@ async function saveVideoInfo(videoData) {
 
 
 // Definindo e exportando a função assíncrona diretamente
+console.log('BUCKET_NAME:', process.env.BUCKET_NAME); // Verificar o valor da variável de ambiente
+
 exports.listVideosAndGenerateSignedUrls = async () => {
   try {
+    console.log('Iniciando listagem de vídeos...'); // Log para indicar o início da operação
     const command = new ListObjectsCommand({
       Bucket: process.env.BUCKET_NAME,
-      Prefix: "videos/", // Ajuste conforme necessário para o seu caso de uso
+      Prefix: "videos/",
     });
+
     const { Contents } = await s3Client.send(command);
+    console.log(`Encontrados ${Contents.length} arquivos.`); // Log para mostrar a quantidade de arquivos encontrados
+
     const urls = await Promise.all(
       Contents.map(async (file) => {
-        // Gera uma URL assinada para cada arquivo listado
         const url = await getSignedUrl(s3Client, new GetObjectCommand({
           Bucket: process.env.BUCKET_NAME,
           Key: file.Key,
-        }), { expiresIn: 3600 }); // Ajuste o tempo de expiração conforme necessário
+        }), { expiresIn: 3600 });
         return { url, key: file.Key };
       })
     );
+
+    console.log('URLs geradas com sucesso.'); // Log para confirmar a geração das URLs
     return { success: true, urls };
   } catch (error) {
     console.error('Erro ao listar vídeos:', error);
     return { success: false, message: 'Erro ao listar vídeos.' };
   }
 };
-
