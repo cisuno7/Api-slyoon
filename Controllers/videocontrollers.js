@@ -8,13 +8,13 @@ require('dotenv').config();
 
 // Configuração do cliente AWS S3
 const s3Client = new S3Client({
-  endpoint: "http://env-6860159.jelastic.saveincloud.net/", // Seu endpoint MinIO
-  region: "us-east-1", // Pode ser necessário ajustar a região conforme necessário
+  endpoint: "http://env-6860159.jelastic.saveincloud.net/", 
+  region: "us-east-1", 
   credentials: {
-    accessKeyId: "wJVUF4S7TVV7r21T", // Sua Access Key
-    secretAccessKey: "RP476d0GpVkTFSIxg3JB4OUZNjnYgUuU" // Sua Secret Key
+    accessKeyId: "wJVUF4S7TVV7r21T", 
+    secretAccessKey: "RP476d0GpVkTFSIxg3JB4OUZNjnYgUuU" 
   },
-  forcePathStyle: true, // Usar o estilo de caminho para buckets (necessário para MinIO)
+  forcePathStyle: true, 
 });
 
 
