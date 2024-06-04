@@ -21,7 +21,7 @@
     "@aws-sdk/s3-request-presigner": "^3.507.0",
     "@azure/msal-node": "^2.6.1",
     "aws-sdk": "^2.1543.0",
-    "bcrypt": "^5.0.0",
+    "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
@@ -32,6 +32,7 @@
     "mssql": "^10.0.1",
     "multer": "^1.4.5-lts.1",
     "node-firebird": "^1.1.8",
+    "nodemailer": "^6.9.13",
     "winston": "^3.11.0"
   },
   "devDependencies": {

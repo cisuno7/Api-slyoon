@@ -46,7 +46,7 @@ const register = async (req, res) => {
   }
 };
 
-const editarPerfil = async (req, res) => {
+const editarPerfil = async (req, res) =>  {
   try {
     // Verifique o token de autenticação e atribua o usuário autenticado à variável `req.user`
     const decoded = jwt.verify(

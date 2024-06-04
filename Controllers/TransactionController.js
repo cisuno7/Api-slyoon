@@ -2,6 +2,8 @@ const express = require("express");
 const paypalConfig = require("../Config/paypal");
 const paypal = require("paypal-rest-sdk");
 var fetch = require("node-fetch");
+const User = require("../Models/User");
+
 
 paypal.configure(paypalConfig);
 
@@ -141,7 +143,8 @@ const withdrawal = async (req, res) => {
       userNative, //se o usuário é nativo
       bank, //nome do banco do usuário
     } = req.body;
-    const userId = req.user.id; //id do usuário
+    const userId = req.body.userId; //id do usuário
+    const email = req.body.email; //email do usuário
     amountWithdrawal1 = 0; //valor parcela de saque 1
     amountWithdrawal2 = 0; //valor parcela de saque 2
     const dateWithdrawal1 = new Date(); //data de solicitação do saque
@@ -203,19 +206,24 @@ const withdrawal = async (req, res) => {
           "Bearer A101.OLQiCyqOpVwigKQQDu3CYlamZ1KTKQmhrbAZK85RIy4IiWh9d_up_lTadp_lfXdV.P3gvkY3PO28akjKYaDorm12QdfK",
       },
       body: JSON.stringify({
-        sender_batch_header: {
-          sender_batch_id: "Payouts_2020_100007",
+        sender_batch_header: 
+        {
           email_subject: "You have a payout!",
-          email_message:
-            "You have received a payout! Thanks for using our service!",
+          email_message: "You have received a payout!"
         },
         items: [
           {
             recipient_type: "EMAIL",
-            amount: { value: "9.87", currency: "USD" },
-            note: "Thanks for your patronage!",
-            sender_item_id: "201403140001",
-            receiver: "receiver@example.com",
+            amount: { value: amountWithdrawal1.toString(), currency: "BRL" },
+            note: "Thanks!",
+            receiver: email,
+            recipient_wallet: "RECIPIENT_SELECTED",
+          }, 
+          {
+            recipient_type: "EMAIL",
+            amount: { value: amountWithdrawal2.toString(), currency: "BRL" },
+            note: "Thanks!",
+            receiver: email,
             recipient_wallet: "RECIPIENT_SELECTED",
           },
         ],
@@ -346,6 +354,30 @@ async function savePayment(update, userId, valueTotal) {
     throw error;
   }
 }
+
+async function qtyVideoWatched(email){
+  const user= await User.findByEmail(email);
+  const userId = user.Id;
+  const qtyVideoWatched = user.QtyVideo;
+
+  const qtyVideo = qtyVideoWatched + 1;
+
+  await User.update(userId, {
+    qtyVideo
+  });
+}
+
+async function qtyAdWatched(email){
+  const user= await User.findByEmail(email);
+  const userId = user.Id;
+  const qtyAdWatched = user.QtyAd;
+
+  const qtyAd = qtyAdWatched + 1;
+
+  await User.update(userId, {
+    qtyAd
+  });
+}
 //#endregion
 
 router.post("/", (req, res) => {});
@@ -357,12 +389,3 @@ function generateGuid() {
     return v.toString(16);
   });
 }
-
-// const {
-//   dadosBankUser, //dados do banco do usuário
-//   identityDocumentUser, //cpf
-//   nameUser, //nome do usuário
-//   dateLastWithdrawal, //data do ultimo pagamento
-//   option,
-// } = req.body;
-

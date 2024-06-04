@@ -10,7 +10,7 @@ let transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   secure: true,
   auth: {
-    user: "slyoon.app@gmail.com",
+    user: "Slyoon.app@gmail.com",
     pass: "@App.sly0on-",
   },
 });
@@ -100,7 +100,7 @@ class User {
     
     var password = await this.findByEmail(email).password;
 
-    transporter.sendemail({
+    transporter.sendMail({
         from: "Slyoon <slyoon.app@gmail.com>",
         to: `${email}`,
         subject: "@App.sly0on-",
